@@ -1,0 +1,121 @@
+- 1 find ID from product 
+- 2 then create data in order 
+- 3 then get 
+
+(
+    how to login 
+    JWT=jsonwebtoken
+
+    first to login 
+    1. login to server
+    2. check if have username or email or password everything,we have already done 
+    then generate to JWT or token by use secret key 
+    3. then return token or JWT to client  to keep usually keep in local-storage or cookie
+    4. then when client to login again will get old Token or JWT have already done to request on server 
+    5.Token we can input everything example email,username,gender,age,fullname...
+
+ authentication use for when client can go to see in whole website but can't go page we don't have allow to go 
+ authorization use for can go which page we allow to go 
+
+)
+
+- tanstack
+
+(
+
+    ->npm init -y 
+
+->npm install express
+
+->npm install nodemon --save-dev  for auto running
+
+-> middleware can(
+    .check authentication
+    .log request
+    .edit req or res 
+    .reverse to next step 
+)
+
+->route use for access 
+
+->route parameter /user/:id (req.param.id);
+
+->query parameter (req.query)
+
+->send for HTML,STRING,FILE  
+
+->query have sign ?
+
+->route have sign as param /
+
+->body in POST/PUT  have middleware express.json()
+
+->query param http://localhost:3000/api/v1/users?limit=10&page=1     "/api/v1/users"
+
+-> npm install useragent  //for clean code or request something
+
++(for connect to database)
+->npm install sequelize sequelize-cli pg pg-hstore 
+
++(have some file )
+->npx sequelize-cli init  
+ 
++ how to connect ot db (
+const db=require("./models")
+db.sequelize.authenticate()
+.then(()=>{
+  console.log("Database connected...");
+})
+.catch((error)=>{
+  console.log("Error:"+error);
+})
+)
+ 
++(how to create model)
+ -npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string 
+
++(then run for get data to database)
+ -then npx sequelize-cli db:migrate
+
++(when we have already created new table then want to delete the new table by use undo)
+ -npx sequelize-cli db:migrate:undo for rollback table
+
+- npx sequelize-cli seed:generate --name demo-user
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.bulkInsert('Users', [
+      {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'example@example.com',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+  },
+  down: (queryInterface, Sequelize) => {
+    return queryInterface.bulkDelete('Users', null, {});
+  },
+};
+- npx sequelize-cli db:seed:all
+
+
+- npm install bcryptjs jsonwebtoken for install jwt
+
+- hashedPassword for convert password to don't understand and store password inside hashedPassword
+
+-npx sequelize-cli migration:generate --name remove-phone-from-customer
+
+ 
+
+- npm install express-fileupload
+-npm install uuid  //use uuid for protect unique file
+
+- npx sequelize-cli migration:generate --name  (new columns)
+
+-npm install docxtemplater fs path pizzip dayjs for report
+
+-express-file upload from website(express file upload https://www.npmjs.com/package/express-fileupload)
+)
+
+-npm install crypto
