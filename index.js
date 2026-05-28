@@ -38,6 +38,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "https://www.trusted-website.com",
+  "https://pos-react-v1-gmqj.vercel.app"
 ];
 const corsOptions = {
   origin: function (origin, callback) {
