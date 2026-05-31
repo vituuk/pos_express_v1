@@ -16,6 +16,11 @@ const orderReportRoutes = require("./src/routes/orders-report");
 const testingRoutes = require("./src/routes/testing");
 const cors = require("cors");
 const paymentRoute = require("./src/routes/payment");
+
+const {storage} = require("./src/storage/storage");
+const multer = require("multer");
+const upload = multer({ storage: storage });
+
 require("dotenv").config();
 
 db.sequelize
