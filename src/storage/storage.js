@@ -19,5 +19,3 @@ module.exports = {
   storage
 };
 
-
-//testing deploy image

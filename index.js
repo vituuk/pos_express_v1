@@ -9,11 +9,9 @@ const authRoutes = require("./src/routes/auth");
 const testOrderRotes = require("./src/routes/test-order");
 const middleWareRoutes = require("./src/middlewares/middlewares");
 const productImageRoutes = require("./src/routes/productImage");
-const fileUpload = require("express-fileupload");
 const path = require("path");
 const paginationRoutes = require("./src/routes/pagination");
 const orderReportRoutes = require("./src/routes/orders-report");
-const testingRoutes = require("./src/routes/testing");
 const cors = require("cors");
 const paymentRoute = require("./src/routes/payment");
 
@@ -58,23 +56,7 @@ const corsOptions = {
   credentials: true, // Set to true if your API uses cookies/sessions
 };
 app.use(cors(corsOptions)); // Apply the CORS middleware())
-
-//for file upload for allow upload size file
-app.use(
-  fileUpload({
-    limits: { fileSize: 30 * 1024 * 1024 }, //30MB
-    createParentPath: true,
-  }),
-);
-
-app.use("/testing", testingRoutes);
-
-//allow can upload file show on  browser
-app.use(
-  "/uploads/products",
-  express.static(path.join(process.cwd(), "uploads/products")),
-);
-
+ 
 //category
 app.use("/api/v1/category", middleWareRoutes, categoryRoutes);
 
