@@ -27,6 +27,7 @@ router.post("/:id/upload",upload.single("file"),async(req,res)=>{
         imageUrl: file.path,
         fileName: file.originalname,
         publicId: file.filename,
+
     })
 
       res.json({
@@ -79,11 +80,15 @@ router.delete("/:imageId",async(req,res)=>{
             })
         }
 
-        const fileName=image.imageUrl.split("/").pop();
-        const filePath=path.join(process.cwd(),"uploads/products",fileName);
+        // const fileName=image.imageUrl.split("/").pop();
+        // const filePath=path.join(process.cwd(),"uploads/products",fileName);
 
-        if(fs.existsSync(filePath)){
-            fs.unlinkSync(filePath);
+        // if(fs.existsSync(filePath)){
+        //     fs.unlinkSync(filePath);
+        // }
+        if(image.publicId){
+
+            await cloudinary.uploader.destroy(image.publicId);
         }
 
         await image.destroy();
