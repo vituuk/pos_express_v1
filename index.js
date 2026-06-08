@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = 3000;
@@ -14,8 +15,10 @@ const paginationRoutes = require("./src/routes/pagination");
 const orderReportRoutes = require("./src/routes/orders-report");
 const cors = require("cors");
 const paymentRoute = require("./src/routes/payment");
+const dashboardRoutes = require("./src/routes/dashboard");
+const customerRoutes = require("./src/routes/customer");
 
-const {storage} = require("./src/storage/storage");
+const { storage } = require("./src/storage/storage");
 const multer = require("multer");
 const upload = multer({ storage: storage });
 
@@ -56,7 +59,7 @@ const corsOptions = {
   credentials: true, // Set to true if your API uses cookies/sessions
 };
 app.use(cors(corsOptions)); // Apply the CORS middleware())
- 
+
 //category
 app.use("/api/v1/category", middleWareRoutes, categoryRoutes);
 
@@ -84,10 +87,27 @@ app.use("/api/v1/order-report", orderReportRoutes);
 //payment
 app.use("/api/v1/payments", middleWareRoutes, paymentRoute);
 
+//dashboard
+app.use("/api/v1/dashboard", middleWareRoutes, dashboardRoutes);
+app.use("/api/v1/customer", middleWareRoutes, customerRoutes);
+
 //health check
 app.get("/api/v1/health", (req, res) => {
   return res.json({
     message: "OK",
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error("Global error handler caught an error:");
+  console.error(err);
+  if (err.http_code) {
+    // Cloudinary error
+    console.error("Cloudinary Error Message:", err.message);
+  }
+  res.status(500).json({ 
+    message: "Internal Server Error", 
+    error: err.message || err 
   });
 });
 

@@ -6,7 +6,7 @@ const authMiddleware=(req,res,next)=>{
       const authHeader=req.header("Authorization");
       console.log("authHeader",authHeader);
        if(!authHeader){
-         res.json({
+         return res.json({
             message:"Unauthorized"
         })
        }
@@ -18,6 +18,10 @@ const authMiddleware=(req,res,next)=>{
 
     }catch(error){
         console.log("error",error);
+        return res.status(401).json({
+            message: "Unauthorized",
+            error: error.message
+        });
     }
     
 }

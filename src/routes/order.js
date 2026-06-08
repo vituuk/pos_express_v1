@@ -4,13 +4,29 @@ const {Customer,Order,OrderDetail,Product} =require("../../models");
 // const order = require("../../../back-end/models/order");
 router.get("",async(req,res)=>{
     try{
-     const orders=await Order.findAll();
+     const orders=await Order.findAll({
+        include:[
+          {
+            model:Customer,
+            as:"customer"
+          },
+          {
+            model:OrderDetail,
+            as:"orderDetails"
+          }
+        ],
+        order:[["id","ASC"]]
+     });
      res.json({
         message:"order route working fine",
         data:orders
      })
     }catch(error){
         console.log("error",error);
+        res.status(500).json({
+            message:"something went wrong",
+            error:error.message
+        });
     }   
 })
  

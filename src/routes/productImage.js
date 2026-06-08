@@ -1,82 +1,88 @@
-const express=require("express");
-const router=express.Router();
-const {v4:uuidv4}=require("uuid");
-const path=require("path");
-const {Product,ProductImage}=require("../../models");
-const fs =require("fs");
+const express = require("express");
+const router = express.Router();
+const { v4: uuidv4 } = require("uuid");
+const path = require("path");
+const { Product, ProductImage } = require("../../models");
+const fs = require("fs");
 
 const { storage, cloudinary } = require("../storage/storage");
 const multer = require("multer");
 const upload = multer({ storage });
 
-router.post("/:id/upload",upload.single("file"),async(req,res)=>{
-    try{
-    //   const {file}=req.files;
-       const file=req.file;
-      const productId=req.params.id;
-      const product=await Product.findByPk(productId);
-      console.log("products",product);
-      if(!product){
-        res.json({
-            message:`Product id=${productId} not found`
+router.post("/:id/upload", upload.single("file"), async (req, res) => {
+    try {
+        //   const {file}=req.files;
+        const file = req.file;
+        const productId = req.params.id;
+        const product = await Product.findByPk(productId);
+        console.log("products", product);
+        if (!product) {
+            return res.json({
+                message: `Product id=${productId} not found`
+            })
+        }
+
+        if (!file) {
+            return res.status(400).json({
+                message: "No file uploaded! Please make sure your Postman key is exactly 'file' and a file is selected."
+            });
+        }
+
+        const saveImage = await ProductImage.create({
+            productId,
+            imageUrl: file.path,
+            fileName: file.originalname,
+            publicId: file.filename,
+
         })
-      }
 
-    const saveImage= await ProductImage.create({
-        productId,
-        imageUrl: file.path,
-        fileName: file.originalname,
-        publicId: file.filename,
+        res.json({
+            message: "Upload image successfully",
+            data: saveImage
+        })
 
-    })
-
-      res.json({
-        message:"Upload image successfully",
-        data:saveImage
-    }) 
-
-    }catch(error){
-        console.log("error",error);
+    } catch (error) {
+        console.log("error", error);
     }
-    
+
 })
 
 //download image
-router.get("/images/:imageId/download",async(req,res)=>{
-    try{
-     const {imageId}=req.params;
-     const image=await ProductImage.findByPk(imageId);
-     if(!image){
-        res.json({
-            message:`Porduct image id=${imageId} not found`
-        })
-     }
+router.get("/images/:imageId/download", async (req, res) => {
+    try {
+        const { imageId } = req.params;
+        const image = await ProductImage.findByPk(imageId);
+        if (!image) {
+            res.json({
+                message: `Porduct image id=${imageId} not found`
+            })
+        }
 
-    //  const fileName=image.imageUrl.split("/").pop();
-     console.log("fileName",fileName);
-    //  const filePath=path.join(process.cwd(),"uploads/products",fileName);
-    //  if(!fs.existsSync(filePath)){
-    //     res.json({
-    //         message:`file id=${imageId} not found`
-    //     })
-    //  }
-      if (image.publicId) {
-    await cloudinary.uploader.destroy(image.publicId);
-  }
-     res.download(filePath,image.fileName);
+        //  const fileName=image.imageUrl.split("/").pop();
+        console.log("fileName", fileName);
+        //  const filePath=path.join(process.cwd(),"uploads/products",fileName);
+        //  if(!fs.existsSync(filePath)){
+        //     res.json({
+        //         message:`file id=${imageId} not found`
+        //     })
+        //  }
+        if (image.publicId) {
+            await cloudinary.uploader.destroy(image.publicId);
+        }
+        res.download(filePath, image.fileName);
 
-    }catch(error){
-        console.log("error",error);
+    } catch (error) {
+        console.log("error", error);
     }
 })
 
-router.delete("/:imageId",async(req,res)=>{
-    try{
-        const {imageId}=req.params;
-        const image=await ProductImage.findByPk(imageId);
-        if(!image){
+router.delete("/:imageId", async (req, res) => {
+    try {
+        const { imageId } = req.params;
+        const image = await ProductImage.findByPk(imageId);
+        if (!image) {
             return res.status(404).json({
-                message:`Image id=${imageId} not found`
+                message: `Image id=${imageId} not found`
             })
         }
 
@@ -86,7 +92,7 @@ router.delete("/:imageId",async(req,res)=>{
         // if(fs.existsSync(filePath)){
         //     fs.unlinkSync(filePath);
         // }
-        if(image.publicId){
+        if (image.publicId) {
 
             await cloudinary.uploader.destroy(image.publicId);
         }
@@ -94,14 +100,14 @@ router.delete("/:imageId",async(req,res)=>{
         await image.destroy();
 
         res.json({
-            message:"Image deleted successfully"
+            message: "Image deleted successfully"
         })
-    } catch(error){
-        console.log("error",error);
+    } catch (error) {
+        console.log("error", error);
         res.status(500).json({
-            message:"Failed to delete image"
+            message: "Failed to delete image"
         })
     }
 })
 
-module.exports=router;
+module.exports = router;

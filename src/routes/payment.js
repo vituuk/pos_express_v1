@@ -172,4 +172,29 @@ router.post("/:tranId/check", async (req, res) => {
     console.error("Error", error);
   }
 });
+// Get all payments
+router.get("", async (req, res) => {
+  try {
+    const payments = await Payment.findAll({
+      include: [
+        {
+          model: Order,
+          as: "order"
+        }
+      ],
+      order: [["id", "ASC"]]
+    });
+    res.json({
+      message: "payments fetched successfully",
+      data: payments,
+    });
+  } catch (error) {
+    console.error("error fetching payments", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
