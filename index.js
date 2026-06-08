@@ -79,7 +79,7 @@ app.use("/api/v1/product-image", productImageRoutes);
 app.use("/api/v1/test-order", testOrderRotes);
 
 //pagination & search
-app.use("/api/v1/products", middleWareRoutes, paginationRoutes);
+app.use("/api/v1/products", paginationRoutes);
 
 //order report
 app.use("/api/v1/order-report", orderReportRoutes);
