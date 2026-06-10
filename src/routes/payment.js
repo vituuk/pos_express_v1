@@ -10,6 +10,7 @@ const {
   buildCheckTransactionHash,
 } = require("../utils/payway");
 const { sendTelegramOrderAlert } = require("../utils/telegram");
+const { sendEmailOrderAlert } = require("../utils/email");
 
 const router = app.Router();
 
@@ -162,9 +163,10 @@ router.post("/:tranId/check", async (req, res) => {
             });
             if (order) {
               await sendTelegramOrderAlert(order, payment);
+              await sendEmailOrderAlert(order, payment);
             }
           } catch (teleErr) {
-            console.error("Failed to send Telegram notification:", teleErr);
+            console.error("Failed to send Telegram or email notification:", teleErr);
           }
         }
       } else if (
