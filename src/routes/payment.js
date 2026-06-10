@@ -72,7 +72,7 @@ router.post("/:orderId", async (req, res) => {
       shipping: "0.00",
       firstname: order.customer?.name || "NA",
       lastname: order.customer?.name || "NA",
-      email: order.customer?.email || "NA@gmail.com",
+      email: order.customer?.email || process.env.ABA_PAYWAY_MERCHANT_EMAIL || "NA@gmail.com",
       phone: order.customer?.phone || "000000000",
       type: "purchase",
       view_type: "popup",
