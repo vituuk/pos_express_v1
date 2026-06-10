@@ -1,50 +1,46 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 /**
- * Sends a receipt email to the configured email address when a transaction succeeds.
+ * Sends a receipt email using Resend API when a transaction succeeds.
  * @param {object} order - The Sequelize Order object.
  * @param {object} payment - The Sequelize Payment object.
  */
 async function sendEmailOrderAlert(order, payment) {
-  const host = process.env.SMTP_HOST || "smtp.gmail.com";
-  const port = parseInt(process.env.SMTP_PORT || "465");
-  const user = process.env.SMTP_USER || process.env.ABA_PAYWAY_MERCHANT_EMAIL;
-  const pass = process.env.SMTP_PASS;
-  const toEmail = process.env.NOTIFICATION_EMAIL || process.env.ABA_PAYWAY_MERCHANT_EMAIL || user;
+  const apiKey = process.env.RESEND_API_KEY;
+  const toEmail = process.env.NOTIFICATION_EMAIL || process.env.ABA_PAYWAY_MERCHANT_EMAIL;
 
-  if (!user || !pass) {
-    console.warn("Email alert skipped: SMTP_USER or SMTP_PASS is not configured in .env");
+  if (!apiKey) {
+    console.warn("Email alert skipped: RESEND_API_KEY is not configured in .env");
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465, // true for 465, false for other ports
-    auth: {
-      user,
-      pass,
-    },
-    family: 4, // Force IPv4 to avoid ENETUNREACH error on Render (IPv6 routing is disabled)
-  });
+  if (!toEmail) {
+    console.warn("Email alert skipped: NOTIFICATION_EMAIL is not configured in .env");
+    return;
+  }
+
+  const resend = new Resend(apiKey);
 
   try {
-    const dateStr = order.orderDate ? new Date(order.orderDate).toLocaleString() : new Date().toLocaleString();
+    const dateStr = order.orderDate
+      ? new Date(order.orderDate).toLocaleString()
+      : new Date().toLocaleString();
 
     // Generate items rows
-    const itemsHtml = order.orderDetails && order.orderDetails.length > 0
-      ? order.orderDetails
-          .map(
-            (item) => `
+    const itemsHtml =
+      order.orderDetails && order.orderDetails.length > 0
+        ? order.orderDetails
+            .map(
+              (item) => `
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">${item.productName}</td>
               <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: center;">x${item.qty}</td>
               <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right;">$${Number(item.productPrice).toFixed(2)}</td>
               <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right; font-weight: bold;">$${Number(item.amount).toFixed(2)}</td>
             </tr>`
-          )
-          .join("")
-      : `<tr><td colspan="4" style="padding: 15px; text-align: center; color: #777777;">No items purchased</td></tr>`;
+            )
+            .join("")
+        : `<tr><td colspan="4" style="padding: 15px; text-align: center; color: #777777;">No items purchased</td></tr>`;
 
     const subtotal = Number(order.total || 0);
     const total = Number(order.total || 0);
@@ -129,7 +125,6 @@ async function sendEmailOrderAlert(order, payment) {
                 <td style="padding: 10px; text-align: right; color: #007bff;">$${total.toFixed(2)}</td>
               </tr>
             </table>
-
           </div>
 
           <!-- Footer -->
@@ -142,15 +137,19 @@ async function sendEmailOrderAlert(order, payment) {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"POS Notification" <${user}>`,
-      to: toEmail,
+    const { data, error } = await resend.emails.send({
+      from: "POS Notification <onboarding@resend.dev>",
+      to: [toEmail],
       subject: `🔔 Payment Invoice: ${order.orderNumber}`,
       html: emailContent,
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Email receipt sent successfully. Message ID: ${info.messageId}`);
+    if (error) {
+      console.error("Resend API error:", error);
+      return;
+    }
+
+    console.log(`Email receipt sent successfully via Resend. ID: ${data.id}`);
   } catch (error) {
     console.error("Error sending email alert:", error.message);
   }
