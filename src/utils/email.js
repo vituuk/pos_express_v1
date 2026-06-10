@@ -25,6 +25,7 @@ async function sendEmailOrderAlert(order, payment) {
       user,
       pass,
     },
+    family: 4, // Force IPv4 to avoid ENETUNREACH error on Render (IPv6 routing is disabled)
   });
 
   try {
