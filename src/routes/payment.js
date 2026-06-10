@@ -9,6 +9,7 @@ const {
   buildPurchaseHash,
   buildCheckTransactionHash,
 } = require("../utils/payway");
+const { sendTelegramOrderAlert } = require("../utils/telegram");
 
 const router = app.Router();
 
@@ -145,8 +146,27 @@ router.post("/:tranId/check", async (req, res) => {
 
     if (statusCode == "00") {
       if (paymentStatusCode === 0 && paymentStatus === "APPROVED") {
+        const isFirstTimePaid = payment.status !== "PAID";
         payment.status = "PAID";
-        payment.paidAt =abaData?.data?.transaction_date;
+        payment.paidAt = abaData?.data?.transaction_date;
+        await payment.save();
+
+        if (isFirstTimePaid) {
+          try {
+            // Retrieve full order details for Telegram notification
+            const order = await Order.findByPk(payment.orderId, {
+              include: [
+                { model: Customer, as: "customer" },
+                { model: OrderDetail, as: "orderDetails" },
+              ],
+            });
+            if (order) {
+              await sendTelegramOrderAlert(order, payment);
+            }
+          } catch (teleErr) {
+            console.error("Failed to send Telegram notification:", teleErr);
+          }
+        }
       } else if (
         paymentStatus === "DECLINED" ||
         paymentStatus === "FAILED" ||
