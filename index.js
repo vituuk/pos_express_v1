@@ -61,7 +61,7 @@ const corsOptions = {
 app.use(cors(corsOptions)); // Apply the CORS middleware())
 
 //category
-app.use("/api/v1/category", middleWareRoutes, categoryRoutes);
+app.use("/api/v1/category", categoryRoutes);
 
 //product
 app.use("/api/v1/product",middleWareRoutes, productRoutes);
